@@ -7,21 +7,42 @@ Pages
 {% block content %}
 <h3> Hey Block Content </h3>
 
+<div id='tweetsDiv'></div>
+
 
 <script type='text/javascript'>
+      
+      // SEND AJAX CALL TO GET TWEETS
       const xhr = new XMLHttpRequest()
       const method = 'GET'
       const url = "/tweets"
       const responseType = "json"
+      
+      var finalTweetsStr = ""
+      var i=0;
 
       xhr.responseType = responseType
       xhr.open(method, url)
       xhr.onload = function(){
             const serverResponse = xhr.response
             var listedItems = serverResponse.data     
-            console.log(listedItems)
+            console.log(listedItems) 
+
+            for (i=0; i < listedItems.length; i++){
+                  var currentItem = `
+                        <div class='mb-4'>      
+                              <h1> ${listedItems[i].id}. ${listedItems[i].content} </h1>
+                        </div>`
+                  finalTweetsStr += currentItem
+            }
+            tweetsDivElement.innerHTML = finalTweetsStr
       }
       xhr.send()
+
+      console.log(finalTweetsStr)
+      const tweetsDivElement = document.getElementById("tweetsDiv")
+      tweetsDivElement.innerHTML = "Loading ..."
+
 </script>
 
 {% endblock %}
