@@ -1,4 +1,27 @@
 {% extends 'layouts/base.html' %}
+
+{% block headtitle %}
+Pages
+{% endblock %}
+
 {% block content %}
 <h3> Hey Block Content </h3>
+
+
+<script type='text/javascript'>
+      const xhr = new XMLHttpRequest()
+      const method = 'GET'
+      const url = "/tweets"
+      const responseType = "json"
+
+      xhr.responseType = responseType
+      xhr.open(method, url)
+      xhr.onload = function(){
+            const serverResponse = xhr.response
+            var listedItems = serverResponse.data     
+            console.log(listedItems)
+      }
+      xhr.send()
+</script>
+
 {% endblock %}

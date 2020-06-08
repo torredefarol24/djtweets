@@ -25,7 +25,20 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
             context["data"] = data
 
       except:
-            context["message"] = "Twwet Not Found"
+            context["message"] = "Tweet Not Found"
             status = 404
 
       return JsonResponse(context, status = status)
+
+
+def tweet_list_view(request, *args, **kwargs):
+      qs = Tweet.objects.all()
+      tweets = [ {"id" : x.id, "content" : x.content } for x in qs]
+      data = {
+            "isUser" : False,
+            "success" : True,
+            "message" : "Tweets Found",
+            "data" : tweets
+      }
+
+      return JsonResponse(data)
