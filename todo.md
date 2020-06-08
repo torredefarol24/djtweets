@@ -5,6 +5,7 @@
 
       -> Delete
       -> Retweeting
+      -> Liking
 
 1. Useres
 
