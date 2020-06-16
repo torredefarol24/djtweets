@@ -16,9 +16,23 @@ Pages
       <div class='col-md-4 mx-auto col-10'>
             <form class='form' method='post' action='/create-tweet' id='tweet-create-form'>
                   {% csrf_token %}
+
+                  <div class='d-none alert alert-danger' id='tweetCreateFormErr'>
+
+                  </div>
+
                   <input type='hidden' value='/' name='next'/>
-                  <textarea class='form-control' name='content' placeholder='Your Tweet ...'></textarea>
-                  <button class='btn btn-primary'>Tweet</button>
+                  
+                  <div class='row'>
+
+                        <div class='col-sm-9'>
+                              <textarea required='required' class='form-control' name='content' placeholder='Your Tweet ...'></textarea>
+                        </div>
+                        <div class='col-sm-3'>
+                              <button class='btn btn-primary'>Tweet</button>
+                        </div>
+                  </div>
+
             </form>
       </div>
 </div>
@@ -43,18 +57,60 @@ Pages
             const method = myForm.getAttribute("method")
 
             const xhr = new XMLHttpRequest()
+            const responseType = "json"
             xhr.open(method, url);
             xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest")
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+            xhr.responseType = responseType
             xhr.onload = function(){
-                  const serverResponse = xhr.response
-                  loadTweets(tweetsDivElement)
+                  if (xhr.status === 201){
+                        handleTweetFormErr("", false)
+                        const newTweet = xhr.response
+                        const newTweetEl = formatTweetElement(newTweet)
+                        const ogHTML = tweetsDivElement.innerHTML
+                        tweetsDivElement.innerHTML = newTweetEl + ogHTML
+                        myForm.reset()
+                  } else if (xhr.status == 400) {
+                        const errorJSON = xhr.response
+                        const contentError = errorJSON.content
+                        let contentErrorMsg;
+
+                        if (contentError) {
+                              contentErrorMsg = contentError[0]
+                              if (contentErrorMsg) {
+                                    handleTweetFormErr(contentErrorMsg, true)
+                              } else {
+                                    alert("Different Error Occured")
+                              }
+
+                        } else {
+                              alert("Uknown Error Occured")
+                        }
+
+                  } else if (xhr.status == 500) {
+                        alert("Try Later")
+
+                  }
             }
             xhr.send(myFormData)
+
+            xhr.onerror = function(){
+                  alert("Cannot Create Tweet! Try Again")
+            }
       }
 
       function handleDidLike(tweet_id, currentCount){
             console.log("HANDLE LIKE", tweet_id, currentCount)
+      }
+
+      function handleTweetFormErr(msg, disp) {
+            var myErrorDiv = document.getElementById("tweetCreateFormErr");
+            tweetCreateFormErr.innerHTML = msg
+            if (disp === true) {
+                  myErrorDiv.setAttribute("class", "alert alert-danger d-block")
+            } else {
+                  myErrorDiv.setAttribute("class", "alert alert-danger d-none")
+            }
       }
 
 
