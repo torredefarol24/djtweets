@@ -87,6 +87,9 @@ Pages
                               alert("Uknown Error Occured")
                         }
 
+                  } else if (xhr.status == 401) {
+                        alert("You Must Login")
+
                   } else if (xhr.status == 500) {
                         alert("Try Later")
 
