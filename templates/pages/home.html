@@ -128,7 +128,7 @@ Pages
             xhr.open(method, url)
             xhr.onload = function(){
                   const serverResponse = xhr.response
-                  var listedItems = serverResponse.data     
+                  var listedItems = serverResponse     
 
                   for (var i=0; i < listedItems.length; i++){
                         var currentItem = listedItems[i]

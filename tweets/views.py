@@ -6,6 +6,9 @@ from .models import Tweet
 from .forms import TweetForm
 from django.utils.http import is_safe_url
 from .serializers import TweetSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
@@ -13,14 +16,21 @@ def home_view(request, *args, **kwargs):
       print(args, kwargs)
       return render(request, "pages/home.html", context = {})
 
+@api_view(['POST'])
 def tweet_create_view(request, *args, **kwargs):
       data = request.POST or None
       serializer = TweetSerializer(data = data)
-      if serializer.is_valid():
-            obj = serializer.save(user = request.user)
-            return JsonResponse( serializer.data , status = 201)
+      if serializer.is_valid(raise_exception=True):
+            serializer.save(user = request.user)
+            return Response( serializer.data , status = 201)
+      return Response({}, status = 400)
 
-      return JsonResponse({}, status = 400)
+
+@api_view(['GET'])
+def tweet_list_view(request, *args, **kwargs):
+      qs = Tweet.objects.all()
+      serializer = TweetSerializer(qs, many=True)
+      return Response(serializer.data, status = 200)
 
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
@@ -82,7 +92,7 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
       return JsonResponse(context, status = status)
 
 
-def tweet_list_view(request, *args, **kwargs):
+def tweet_list_view_pure_django(request, *args, **kwargs):
       qs = Tweet.objects.all()
       tweets = [ x.serialize() for x in qs]
       data = {
