@@ -6,8 +6,10 @@ from .models import Tweet
 from .forms import TweetForm
 from django.utils.http import is_safe_url
 from .serializers import TweetSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
@@ -16,7 +18,10 @@ def home_view(request, *args, **kwargs):
       print(args, kwargs)
       return render(request, "pages/home.html", context = {})
 
+
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication])
 def tweet_create_view(request, *args, **kwargs):
       data = request.POST or None
       serializer = TweetSerializer(data = data)
@@ -31,6 +36,30 @@ def tweet_list_view(request, *args, **kwargs):
       qs = Tweet.objects.all()
       serializer = TweetSerializer(qs, many=True)
       return Response(serializer.data, status = 200)
+
+
+@api_view(['GET'])
+def tweet_detail_view(request, tweet_id, *args, **kwargs):
+      qs = Tweet.objects.get(id=tweet_id)
+      if not qs.exists():
+            return Response({}, status = 404)
+      serializer = TweetSerializer(qs)
+      return Response(serializer.data, status = 200)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication])
+def tweet_delete_view(request, tweet_id, *args, **kwargs):
+      qs = Tweet.objects.filter(id=tweet_id)
+      if not qs.exists():
+            return Response({}, status = 404)
+      qs = qs.filter(user = request.user)
+      if not qs.exists():
+            return Response({"message" : "You cannot delete this tweet"}, status = 401)
+      qs.delete()
+      return Response({"message" : "Tweet Deleted"}, status = 200)
+
 
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
@@ -68,7 +97,7 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
       }
       return render(request, 'components/form.html', context = context)
 
-def tweet_detail_view(request, tweet_id, *args, **kwargs):
+def tweet_detail_view_pure_django(request, tweet_id, *args, **kwargs):
       print(args, kwargs)
       context = {
             "success" : True,
